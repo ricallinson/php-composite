@@ -63,7 +63,7 @@ function dispatch($source) {
     );
 */
 
-$module->exports = function ($slots, $data) {
+$module->exports = function ($slots, $data=array()) {
 
     /*
         Here we "dispatch" each $slot we are given adding the result to the $data array.
