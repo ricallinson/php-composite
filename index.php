@@ -28,7 +28,11 @@ function dispatch($source) {
 
         case "string":
 
-            return call_user_func($source);
+            if (function_exists($source)) {
+                return call_user_func($source);
+            }
+
+            return $source;
 
         /*
             If we got an array then use "php-require".
@@ -67,10 +71,19 @@ function dispatch($source) {
     $slots = array(
         "header" => array(
             "module" => "name",
-            "func" => "function_name"
+            "action" => "function_name"
         ),
         "main" => function (),
-        "footer" => "function_name"
+        "footer" => "function_name",
+        "sidebar" => array(
+            array(
+                "module" => "name",
+                "action" => "function_name"
+            ),
+            array(
+                "main" => function ()
+            )
+        )
     );
 
     $data = array(
