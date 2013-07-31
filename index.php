@@ -8,7 +8,6 @@ namespace php_require\php_composite;
 function dispatch($source) {
 
     $type = gettype($source);
-    $call = null;
 
     switch ($type) {
 
@@ -17,6 +16,7 @@ function dispatch($source) {
         */
 
         case "object":
+
             if (get_class($source) === "Closure") {
                 return $source();
             }
@@ -27,6 +27,7 @@ function dispatch($source) {
         */
 
         case "string":
+
             return call_user_func($source);
 
         /*
@@ -34,10 +35,31 @@ function dispatch($source) {
         */
 
         case "array":
-            global $require;
-            $action = isset($source["action"]) ? $source["action"] : "render";
-            $module = $require($source["module"]);
-            return $module[$source["action"]]();
+
+            global $require; // NOTE: this is the top level $require
+
+            if (isset($source[0]) && gettype($source[0]) === "array") {
+
+                /*
+                    If we got an array of array's try again.
+                */
+
+                $return = "";
+                foreach ($source as $module) {
+                    $return .= dispatch($module);
+                }
+                return $return;
+
+            } else {
+
+                /*
+                    Here we assume we got a module/action pair.
+                */
+
+                $action = $source["action"];
+                $module = $require($source["module"]);
+                return $module[$source["action"]]();
+            }
     }
 }
 
