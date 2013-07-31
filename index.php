@@ -11,22 +11,23 @@ function dispatch($source) {
 
     switch ($type) {
 
-        /*
-            If we have an object and it's a "Closure" call it.
-        */
-
         case "object":
+
+            /*
+                If we have an object and it's a "Closure" call it.
+            */
 
             if (get_class($source) === "Closure") {
                 return $source();
             }
-            break;
 
-        /*
-            If we got a string use call_user_func() on it.
-        */
+            return;
 
         case "string":
+
+            /*
+                If we got a string use call_user_func() on it.
+            */
 
             if (function_exists($source)) {
                 return call_user_func($source);
@@ -34,11 +35,11 @@ function dispatch($source) {
 
             return $source;
 
-        /*
-            If we got an array then use "php-require".
-        */
-
         case "array":
+
+            /*
+                If we got an array then use "php-require".
+            */
 
             global $require; // NOTE: this is the top level $require
 
@@ -52,6 +53,7 @@ function dispatch($source) {
                 foreach ($source as $module) {
                     $return .= dispatch($module);
                 }
+
                 return $return;
 
             } else {
@@ -62,7 +64,16 @@ function dispatch($source) {
 
                 $action = $source["action"];
                 $module = $require($source["module"]);
-                return $module[$source["action"]]();
+
+                /*
+                    Check that we can call a function so the page doesn't bomb with error.
+                */
+
+                if (isset($module[$source["action"]]) && get_class($module[$source["action"]]) == "Closure") {
+                    return $module[$source["action"]]();
+                }
+
+                return "";
             }
     }
 }
