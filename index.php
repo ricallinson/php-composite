@@ -36,9 +36,9 @@ function dispatch($source) {
 
             if (function_exists($source)) {
                 $result = call_user_func($source);
+            } else {
+                $result = $source;
             }
-
-            $result = $source;
 
             break;
 
@@ -48,7 +48,7 @@ function dispatch($source) {
                 If we got an array then use "php-require".
             */
 
-            global $require; // NOTE: this is the top level $require
+            global $require; // NOTE: this is the top level $require() var.
 
             if (isset($source[0]) && gettype($source[0]) === "array") {
 
@@ -66,7 +66,7 @@ function dispatch($source) {
                     Here we assume we got a module/action pair.
                 */
 
-                if ($source["module"] || $source["action"]) {
+                if (isset($source["module"]) && isset($source["action"])) {
 
                     $action = $source["action"];
                     $module = $require($source["module"]);
@@ -112,7 +112,9 @@ function dispatch($source) {
                 "action" => "function_name"
             ),
             array(
-                "main" => function ()
+                "main" => function () {
+                    return function ()
+                }
             )
         )
     );
