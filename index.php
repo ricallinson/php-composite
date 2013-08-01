@@ -62,6 +62,10 @@ function dispatch($source) {
                     Here we assume we got a module/action pair.
                 */
 
+                if (!$source["module"] || !$source["action"]) {
+                    return "";
+                }
+
                 $action = $source["action"];
                 $module = $require($source["module"]);
 
