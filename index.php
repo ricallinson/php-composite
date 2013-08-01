@@ -10,11 +10,11 @@ namespace php_require\php_composite;
 function dispatch($source) {
 
     $result = "";
-    $type = gettype($source);
+    $buffer = null;
 
     ob_start();
 
-    switch ($type) {
+    switch (gettype($source)) {
 
         case "object":
 
