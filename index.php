@@ -3,11 +3,16 @@ namespace php_require\php_composite;
 
 /*
     Executes the given $source.
+
+    Could do with a refactor.
 */
 
 function dispatch($source) {
 
+    $result = "";
     $type = gettype($source);
+
+    ob_start();
 
     switch ($type) {
 
@@ -18,10 +23,10 @@ function dispatch($source) {
             */
 
             if (get_class($source) === "Closure") {
-                return $source();
+                $result = $source();
             }
 
-            return;
+            break;
 
         case "string":
 
@@ -30,10 +35,12 @@ function dispatch($source) {
             */
 
             if (function_exists($source)) {
-                return call_user_func($source);
+                $result = call_user_func($source);
             }
 
-            return $source;
+            $result = $source;
+
+            break;
 
         case "array":
 
@@ -49,12 +56,9 @@ function dispatch($source) {
                     If we got an array of array's try again.
                 */
 
-                $return = "";
                 foreach ($source as $module) {
-                    $return .= dispatch($module);
+                    $result .= dispatch($module);
                 }
-
-                return $return;
 
             } else {
 
@@ -62,24 +66,36 @@ function dispatch($source) {
                     Here we assume we got a module/action pair.
                 */
 
-                if (!$source["module"] || !$source["action"]) {
-                    return "";
+                if ($source["module"] || $source["action"]) {
+
+                    $action = $source["action"];
+                    $module = $require($source["module"]);
+
+                    /*
+                        Check that we can call a function so the page doesn't bomb with error.
+                    */
+
+                    if (isset($module[$source["action"]]) && get_class($module[$source["action"]]) == "Closure") {
+                        $result = $module[$source["action"]]();
+                    }
                 }
-
-                $action = $source["action"];
-                $module = $require($source["module"]);
-
-                /*
-                    Check that we can call a function so the page doesn't bomb with error.
-                */
-
-                if (isset($module[$source["action"]]) && get_class($module[$source["action"]]) == "Closure") {
-                    return $module[$source["action"]]();
-                }
-
-                return "";
             }
+
+            break;
     }
+
+    $buffer = ob_get_contents();
+    ob_end_clean();
+
+    /*
+        If $buffer has a value then we think there was an error so return the error.
+    */
+
+    if ($buffer) {
+        return $buffer;
+    }
+
+    return $result;
 }
 
 /*
