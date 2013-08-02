@@ -33,6 +33,17 @@ describe("php-composite", function () use ($composite) {
             assert($result["foo"] === "bar");
         });
 
+        it("should return [123]", function () use ($composite) {
+
+            $slots = array(
+                "foo" => 123
+            );
+
+            $result = $composite($slots);
+
+            assert($result["foo"] === 123);
+        });
+
         it("should return [bar, qux]", function () use ($composite) {
 
             $slots = array(
@@ -139,6 +150,26 @@ describe("php-composite", function () use ($composite) {
             $result = $composite($slots);
 
             assert($result["qux"] === "barbaz");
+        });
+
+        it("should return [barbaz] from module1 and module2", function () use ($composite) {
+
+            $slots = array(
+                "qux" => array(
+                    array(
+                        "module" => "./test/fixtures/module1/index.php",
+                        "action" => "foo"
+                    ),
+                    array(
+                        "module" => "./test/fixtures/module2/index.php",
+                        "action" => "bar"
+                    )
+                )
+            );
+
+            $result = $composite($slots, null, true);
+
+            assert(strpos($result["qux"], "class=\"module-time\"") > 0);
         });
 
         it("should return [error] from buffer", function () use ($composite) {
