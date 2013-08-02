@@ -82,6 +82,10 @@ function dispatch($source) {
             }
 
             break;
+
+        default:
+
+            $result = $source;
     }
 
     $buffer = ob_get_contents();
