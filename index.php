@@ -7,8 +7,9 @@ namespace php_require\php_composite;
     Could do with a refactor.
 */
 
-function dispatch($source) {
+function dispatch($source, $debug = false) {
 
+    $start = microtime(true);
     $result = "";
     $buffer = null;
 
@@ -35,9 +36,18 @@ function dispatch($source) {
             */
 
             if (function_exists($source)) {
+
                 $result = call_user_func($source);
+
             } else {
+
                 $result = $source;
+
+                /*
+                    Clear the start time too as we don't need it.
+                */
+
+                $start = 0;
             }
 
             break;
@@ -57,8 +67,14 @@ function dispatch($source) {
                 */
 
                 foreach ($source as $module) {
-                    $result .= dispatch($module);
+                    $result .= dispatch($module, $debug);
                 }
+
+                /*
+                    Clear the start time too as we don't need it.
+                */
+
+                $start = 0;
 
             } else {
 
@@ -86,10 +102,21 @@ function dispatch($source) {
         default:
 
             $result = $source;
+
+            /*
+                Clear the start time too as we don't need it.
+            */
+
+            $start = 0;
     }
 
     $buffer = ob_get_contents();
     ob_end_clean();
+    $end = microtime(true);
+
+    if ($debug && $start) {
+        $result .= "<span class=\"module-time\">" . ($end - $start) . "</span>";
+    }
 
     /*
         If $buffer has a value then we think there was an error so return the error.
@@ -135,14 +162,14 @@ function dispatch($source) {
     );
 */
 
-$module->exports = function ($slots, $data=array()) {
+$module->exports = function ($slots, $data=array(), $debug = false) {
 
     /*
         Here we "dispatch" each $slot we are given adding the result to the $data array.
     */
 
     foreach ($slots as $slot => $action) {
-        $data[$slot] = dispatch($action);
+        $data[$slot] = dispatch($action, $debug);
     }
 
     /*
