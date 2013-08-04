@@ -85,14 +85,25 @@ function dispatch($source, $debug = false) {
                 if (isset($source["module"]) && isset($source["action"])) {
 
                     $action = $source["action"];
-                    $module = $require($source["module"]);
 
-                    /*
-                        Check that we can call a function so the page doesn't bomb with error.
-                    */
+                    try {
 
-                    if (isset($module[$source["action"]]) && get_class($module[$source["action"]]) == "Closure") {
-                        $result = $module[$source["action"]]();
+                        $module = $require($source["module"]);
+
+                        /*
+                            Check that we can call a function so the page doesn't bomb with error.
+                        */
+
+                        if (isset($module[$source["action"]]) && get_class($module[$source["action"]]) == "Closure") {
+                            $result = $module[$source["action"]]();
+                        }
+
+                    } catch (Exception $e) {
+
+                        $result = "Error loading module.";
+
+                        error_log("php-composite: Error loading module : " . $source["module"]);
+
                     }
                 }
             }
