@@ -95,7 +95,14 @@ function dispatch($source, $debug = false) {
                         */
 
                         if (isset($module[$source["action"]]) && get_class($module[$source["action"]]) == "Closure") {
-                            $result = $module[$source["action"]]();
+
+                            $params = array();
+
+                            if (isset($source["params"])) {
+                                $params = $source["params"];
+                            }
+
+                            $result = $module[$source["action"]]($params);
                         }
 
                     } catch (Exception $e) {
