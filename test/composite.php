@@ -114,6 +114,23 @@ describe("php-composite", function () use ($composite) {
             assert($result["foo"] === "bar");
         });
 
+        it("should return [bar] from module4 with params", function () use ($composite) {
+
+            $slots = array(
+                "foo" => array(
+                    "module" => "./test/fixtures/module4/index.php",
+                    "action" => "foo",
+                    "params" => array(
+                        "foo" => "bar"
+                    )
+                )
+            );
+
+            $result = $composite($slots);
+
+            assert($result["foo"] === "bar");
+        });
+
         it("should return [baz] from module2", function () use ($composite) {
 
             $slots = array(
